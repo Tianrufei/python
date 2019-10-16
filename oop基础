@@ -1,3 +1,5 @@
+
+(一)
 class Role:
     def __init__(self, nm, wp):
         '构造器方法，创建实例时自动调用，经常用于设置实例属性'
@@ -19,7 +21,7 @@ if __name__ == '__main__':
     lb.show_me()   # 调用方法，实例自动作为第一个参数传递
     zf.show_me()
 
-
+(二)
 class Weapon:
     def __init__(self, nm, type):
         self.wname = nm
@@ -40,6 +42,7 @@ if __name__ == '__main__':
     print(lb.weapon.wname, lb.weapon.type)
 
 
+(三)
 class Role:
     def __init__(self, nm, wp):
         self.name = nm
@@ -67,6 +70,8 @@ if __name__ == '__main__':
     lb.speak('人在塔在')
     lb.attack('董卓')
 
+
+(四)
 class A:
     def __init__(self, a, b, c, d):
         self.a = a
@@ -84,7 +89,8 @@ if __name__ == '__main__':
     c1 = C(10, 20, 30, 40, 5)
     print(c1.a, c1.e)
     
-    
+
+(五)    
 class A:
     def funca(self):
         print('class a')
