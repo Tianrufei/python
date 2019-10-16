@@ -1,0 +1,134 @@
+###(数据库中的表格创建)
+import pymysql
+
+# 创建到数据库服务器的连接
+conn = pymysql.connect(
+    host='192.168.4.10',
+    port=3306,
+    user='root',
+    passwd='123456',
+    db='nsd1905',
+    charset='utf8'
+)
+
+# 创建游标
+cur = conn.cursor()
+
+# 编写sql语句
+create_dep = '''CREATE TABLE departments(
+dep_id INT, dep_name VARCHAR(20),
+PRIMARY KEY(dep_id)
+)'''
+create_emp = '''CREATE TABLE employees(
+emp_id INT, emp_name VARCHAR(20), birth_date DATE, email VARCHAR(50),
+dep_id INT,
+PRIMARY KEY(emp_id),
+FOREIGN KEY(dep_id) REFERENCES departments(dep_id)
+)'''
+create_sal = '''CREATE TABLE salary(
+id INT, date DATE, emp_id INT, basic INT, awards INT,
+PRIMARY KEY(id),
+FOREIGN KEY(emp_id) REFERENCES employees(emp_id)
+)'''
+
+# 执行sql语句
+cur.execute(create_dep)
+cur.execute(create_emp)
+cur.execute(create_sal)
+
+# 对数据库有改动，需要确认
+conn.commit()
+
+# 关闭
+cur.close()
+conn.close()
+
+###(数据库修改查询)
+import pymysql
+
+# 创建到数据库服务器的连接
+conn = pymysql.connect(
+    host='192.168.4.10',
+    port=3306,
+    user='root',
+    passwd='123456',
+    db='nsd1905',
+    charset='utf8'
+)
+
+# 创建游标
+cur = conn.cursor()
+
+# 执行sql语句
+# 创建部门
+insert1 = 'INSERT INTO departments VALUES(%s, %s)'
+hr = [(1, '人事部')]
+deps = [(2, 'ops'), (3, 'dev'), (4, 'qa'), (5, 'market'), (6, 'sales')]
+cur.executemany(insert1, hr)
+cur.executemany(insert1, deps)
+############################################
+# 查询
+# select1 = 'SELECT * FROM departments'
+# cur.execute(select1)
+# result1 = cur.fetchone()  # 取一个记录
+# print(result1)
+# result2 = cur.fetchmany(2)   # 继续取2个记录
+# print(result2)
+# result3 = cur.fetchall()   # 继续取剩余全部记录
+# print(result3)
+############################################
+# 移动游标
+# select1 = 'SELECT * FROM departments'
+# cur.execute(select1)
+# cur.scroll(2, mode='absolute')  # absolute总是从开头算起
+# result1 = cur.fetchone()
+# print(result1)
+# cur.scroll(1)  # 默认以相对方式移动，即从当前位置移动
+# result2 = cur.fetchone()
+# print(result2)
+############################################
+# 修改
+# update1 = 'UPDATE departments SET dep_name=%s WHERE dep_name=%s'
+# cur.execute(update1, ('人力资源部', '人事部'))
+############################################
+# 删除
+# delete1 = 'DELETE FROM departments WHERE dep_id=%s'
+# cur.execute(delete1, (6,))
+
+# 对数据库有改动，需要确认
+conn.commit()
+
+# 关闭
+cur.close()
+conn.close()
+
+###(sqlalchemy模块创建数据库中的表格)
+from sqlalchemy import create_engine, Column, Integer, String, Date, ForeignKey
+from sqlalchemy.ext.declarative import declarative_base
+
+# 创建到数据库的引擎
+engine = create_engine(
+    # mysql+pymysql://用户:密码@服务器/数据库?选项
+    'mysql+pymysql://root:123456@192.168.4.10/tedu1905?charset=utf8',
+    encoding='utf8',
+    echo=True  # 显示调试信息，生产环境下不要设置
+)
+# 生成实体类的基类
+Base = declarative_base()
+
+class Departments(Base):
+    __tablename__ = 'departments'  # 指定类对应的表
+    dep_id = Column(Integer, primary_key=True)
+    dep_name = Column(String(20), unique=True)
+
+class Employees(Base):
+    __tablename__ = 'employees'
+    emp_id = Column(Integer, primary_key=True)
+    emp_name = Column(String(20))
+    birth_date = Column(Date)
+    email = Column(String(50))
+    dep_id = Column(Integer, ForeignKey('departments.dep_id'))
+
+if __name__ == '__main__':
+    # 如果库中没有表则创建，有的话只是进行关联，不会再创建一遍
+    Base.metadata.create_all(engine)
